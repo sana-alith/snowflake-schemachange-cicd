@@ -1,0 +1,46 @@
+name: schemachange_dev
+
+on:
+  push:
+    branches: ["dev"]
+  workflow_dispatch:
+
+jobs:
+  deploy_Snowflake_Scripts:
+
+    runs-on: ubuntu-latest
+    environment: dev
+
+    env:
+      ENV: ${{ vars.ENV }}
+
+    steps:
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install schemachange
+      run: pip install schemachange
+
+    - name: Create connections.toml
+      run: |
+        mkdir -p ./schemachange/connection
+        cat <<EOF > ./schemachange/connection/connections.toml
+        [${{ vars.ENV }}]
+        account = "${{ vars.SF_ACCOUNT }}"
+        user = "${{ vars.SF_USER }}"
+        password = "${{ secrets.SF_PASSWORD }}"
+        role = "${{ vars.SF_ROLE }}"
+        warehouse = "${{ vars.SF_WAREHOUSE }}"
+        database = "${{ vars.SF_DATABASE }}"
+        EOF
+
+    - name: Run schemachange
+      run: |
+        cd ./schemachange
+        schemachange deploy --config-folder . --verbose
