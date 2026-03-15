@@ -1,0 +1,1 @@
+alter table DEMO_TABLE add column gender varchar(1);
