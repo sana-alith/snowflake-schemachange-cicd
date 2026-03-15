@@ -1,13 +1,11 @@
 name: Validate Snowflake SQL
 
 on:
-  push:
-    branches:
-      - dev
   pull_request:
-    branches:
-      - uat
-      - main
+  branches:
+    - uat
+    - main
+  types: [opened, synchronize]
 
 jobs:
   validate:
@@ -43,7 +41,7 @@ jobs:
           echo "$duplicates"
           exit 1
         fi
-        
+
     - name: Check dangerous SQL
       run: |
         cd schemachange/db_scripts

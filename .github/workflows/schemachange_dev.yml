@@ -29,9 +29,10 @@ jobs:
 
     - name: Create connections.toml
       run: |
+        echo "ENV=$ENV"
         mkdir -p ./schemachange/connection
         cat <<EOF > ./schemachange/connection/connections.toml
-        [${{ vars.ENV }}]
+        [$ENV]
         account = "${{ vars.SF_ACCOUNT }}"
         user = "${{ vars.SF_USER }}"
         password = "${{ secrets.SF_PASSWORD }}"
@@ -40,6 +41,10 @@ jobs:
         database = "${{ vars.SF_DATABASE }}"
         EOF
 
+    - name: Print environment variables
+      run: env | sort
+
+    
     - name: Run schemachange
       run: |
         cd ./schemachange
