@@ -43,3 +43,17 @@ jobs:
           echo "$duplicates"
           exit 1
         fi
+        
+    - name: Check dangerous SQL
+      run: |
+        cd schemachange/db_scripts
+
+        if grep -i "DROP TABLE" *.sql; then
+          echo "DROP TABLE detected. Manual review required."
+          exit 1
+        fi
+
+        if grep -i "TRUNCATE TABLE" *.sql; then
+          echo "TRUNCATE detected. Manual review required."
+          exit 1
+        fi
