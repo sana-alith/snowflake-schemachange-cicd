@@ -1,0 +1,37 @@
+name: Deploy Snowflake UAT
+
+on:
+  pull_request:
+    branches:
+      - uat
+    types:
+      - closed
+
+jobs:
+  deploy:
+    if: github.event.pull_request.merged == true
+
+    runs-on: ubuntu-latest
+    environment: UAT
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install schemachange
+        run: pip install schemachange
+
+      - name: Run schemachange for UAT
+        env:
+          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
+          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
+          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
+          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
+          SNOWFLAKE_DATABASE: UAT_DB
+          SNOWFLAKE_SCHEMA: PUBLIC
+
+        run: |
+          schemachange deploy \
+          --config-folder schemachange
