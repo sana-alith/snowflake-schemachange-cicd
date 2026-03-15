@@ -1,37 +1,48 @@
-name: Deploy Snowflake UAT
+name: schemachange_uat
 
 on:
   pull_request:
-    branches:
-      - uat
-    types:
-      - closed
+    branches: ["uat"]
+    types: [closed]
 
 jobs:
-  deploy:
+  deploy_Snowflake_Scripts:
+
     if: github.event.pull_request.merged == true
 
     runs-on: ubuntu-latest
-    environment: UAT
+    environment: uat
+
+    env:
+      ENV: ${{ vars.ENV }}
 
     steps:
 
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Install schemachange
-        run: pip install schemachange
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
 
-      - name: Run schemachange for UAT
-        env:
-          SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
-          SNOWFLAKE_USER: ${{ secrets.SNOWFLAKE_USER }}
-          SNOWFLAKE_PASSWORD: ${{ secrets.SNOWFLAKE_PASSWORD }}
-          SNOWFLAKE_ROLE: ${{ secrets.SNOWFLAKE_ROLE }}
-          SNOWFLAKE_WAREHOUSE: ${{ secrets.SNOWFLAKE_WAREHOUSE }}
-          SNOWFLAKE_DATABASE: UAT_DB
-          SNOWFLAKE_SCHEMA: PUBLIC
+    - name: Install schemachange
+      run: pip install schemachange
 
-        run: |
-          schemachange deploy \
-          --config-folder schemachange
+    - name: Create connections.toml
+      run: |
+        mkdir -p ./schemachange/connection
+        cat <<EOF > ./schemachange/connection/connections.toml
+        [${{ vars.ENV }}]
+        account = "${{ vars.SF_ACCOUNT }}"
+        user = "${{ vars.SF_USER }}"
+        password = "${{ secrets.SF_PASSWORD }}"
+        role = "${{ vars.SF_ROLE }}"
+        warehouse = "${{ vars.SF_WAREHOUSE }}"
+        database = "${{ vars.SF_DATABASE }}"
+        EOF
+
+    - name: Run schemachange
+      run: |
+        cd ./schemachange
+        schemachange deploy --config-folder . --verbose
