@@ -1,0 +1,2 @@
+update DEMO_TABLE set GENDER='F' where name='SANA';
+INSERT INTO DEMO_TABLE VALUES (1,'DAN','M');
