@@ -1,0 +1,21 @@
+config-version: 1
+
+root-folder: './db_scripts'
+
+modules-folder: null
+
+connections-file-path: './connection/connections.toml'
+
+connection-name: "{{ env_var('ENV') }}"
+
+change-history-table: "DEMO_DB_{{ env_var('ENV') }}.SCHEMACHANGE.CHANGE_HISTORY"
+
+vars:
+  env: "{{ env_var('ENV') }}"
+  database: "DEMO_DB_{{ env_var('ENV') }}"
+
+create-change-history-table: true
+autocommit: false
+verbose: true
+dry-run: false
+query-tag: 'QUERY_TAG'
